@@ -21,7 +21,7 @@ apt-get install -yq \
 # Install CloudSQL Proxy
 wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O cloud_sql_proxy
 chmod +x cloud_sql_proxy
-./cloud_sql_proxy -instances=manual-python-bookshelf:europe-west3:bookshelf-db=tcp:3306 -ip_address_types=PRIVATE
+./cloud_sql_proxy -instances=manual-python-bookshelf:europe-west3:bookshelf-db=tcp:3306 -ip_address_types=PRIVATE &
 
 # Create a pythonapp user. The application will run as this user.
 useradd -m -d /home/pythonapp pythonapp
