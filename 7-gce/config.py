@@ -43,7 +43,7 @@ CLOUDSQL_DATABASE = 'bookshelf'
 # Set this value to the Cloud SQL connection name, e.g.
 #   "project:region:cloudsql-instance".
 # You must also update the value in app.yaml.
-CLOUDSQL_CONNECTION_NAME = 'manual-python-bookshelf:europe-west3:bookshelf-db'
+CLOUDSQL_CONNECTION_NAME = 'tf-bookshelf-project:us-central1:bookshelf-db-tf-242ee030'
 
 # The CloudSQL proxy is used locally to connect to the cloudsql instance.
 # To start the proxy, use:
