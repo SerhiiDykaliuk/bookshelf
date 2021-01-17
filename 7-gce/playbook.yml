@@ -1,0 +1,75 @@
+---
+- name: update web servers
+  hosts: localhost
+  become: true
+  vars:
+    db_connection: tf-bookshelf-project:us-central1:bookshelf-db-tf-1cd7c605a0
+    PROJECTID: tf-bookshelf-project
+  tasks:
+
+    - name: download google-fluentd-install.sh
+      get_url:
+        url: https://storage.googleapis.com/signals-agents/logging/google-fluentd-install.sh
+        dest: /root
+        mode: '551'
+
+    - name: Run a google-fluentd-install.sh
+      script: /root/google-fluentd-install.sh
+
+    - name: download cloud_sql_proxy
+      get_url:
+        url: https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
+        dest: /root/cloud_sql_proxy
+        mode: '551'
+
+    - name: Run cloud_sql_proxy
+      shell: /root/cloud_sql_proxy -instances={{ db_connection }}=tcp:3306 </dev/null >/dev/null 2>&1 &
+
+    - name: install packeges
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - "git"
+        - "build-essential"
+        - "supervisor"
+        - "python"
+        - "python-dev"
+        - "python-pip"
+        - "libffi-dev"
+        - "libssl-dev"
+        - "mysql-client"
+
+    - name: git credentials
+      command: git config --global credential.helper gcloud.sh
+
+    - git:
+        repo: 'https://source.developers.google.com/p/{{ PROJECTID }}/r/github_serhiidykaliuk_bookshelf'
+        dest: /srv/checkout
+        version: release-0.22
+
+    - name: add app user
+      user:
+        name: pythonapp
+        home: /home/pythonapp #???
+
+    - name: install virtualenv
+      pip:
+        name: virtualenv
+        state: latest
+
+    - name: install pip packeges
+      pip:
+        virtualenv: /opt/app/7-gce/env
+        requirements: /opt/app/7-gce/requirements.txt
+
+    - name: change /opt/app dir owner
+      file:
+        path: /opt/app
+        state: directory
+        recurse: yes
+        owner: pythonapp
+        group: pythonapp
+
+    - name: create tables
+      command: /opt/app/7-gce/env/bin/python /opt/app/7-gce/bookshelf/model_cloudsql.py
